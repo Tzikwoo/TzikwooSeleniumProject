@@ -1,3 +1,7 @@
+package Tests;
+
+import Pages.HomePage;
+import Pages.SearchResultsPage;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
@@ -9,29 +13,31 @@ import org.openqa.selenium.chrome.ChromeDriver;
 
 public class SearchTest {
     private WebDriver driver;
+    private HomePage homePage;
+    private SearchResultsPage searchResultsPage;
     @Before
     public void initDriver(){
         System.setProperty("webdriver.chrome.driver", "resources/chromedriver.exe");
         driver = new ChromeDriver();
         driver.manage().window().maximize();
         driver.get("http://testfasttrackit.info/selenium-test/");
+        homePage = new HomePage(driver);
+        searchResultsPage = new SearchResultsPage(driver);
     }
     @Test
     public void searchForSpecificItem(){
-        driver.findElement(By.id("search")).sendKeys("Shirt");
-        driver.findElement(By.cssSelector(".search-button")).click();
-        WebElement shirtText = driver.findElement(By.cssSelector("h2:first-child a"));
-        String actualText = shirtText.getText();
-        String expectedText = "CORE STRIPED SPORT SHIRT";
-        Assert.assertEquals(expectedText,actualText);
-
+        homePage.setSearchField("Shirt");
+        homePage.clickSearchButton();
+        Assert.assertTrue(searchResultsPage.isProductInList("CORE STRIPED SPORT SHIRT"));
+        homePage.setSearchField("Neck");
+        homePage.clickSearchButton();
+        Assert.assertTrue(searchResultsPage.isProductInList("SILVER DESERT NECKLACE"));
     }
     @Test
     public void searchForInexistentItem(){
-        driver.findElement(By.id("search")).sendKeys("Nothing");
-        driver.findElement(By.cssSelector(".search-button")).click();
-        WebElement noResultsText = driver.findElement(By.cssSelector(".note-msg"));
-        String actualText = noResultsText.getText();
+        homePage.setSearchField("Nothing");
+        homePage.clickSearchButton();
+        String actualText = searchResultsPage.getResultMessageText();
         String expectedText = "Your search returns no results.";
         Assert.assertEquals(expectedText,actualText);
     }
